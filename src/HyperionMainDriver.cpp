@@ -97,19 +97,18 @@ void HyperionMainDriver::load_mesh()
   std::cout << "[Driver::load_mesh] Initializing a VTK unstructured grid\n";
 
   // Create VTK points
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  auto points = vtkSmartPointer<vtkPoints>::New();
 
   // Insert points from Gmsh node coordinates
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  for(size_t i = 0; i < nodes.size(); ++i)
+  {
+    size_t node = nodes[i];
+    points->InsertPoint(node - 1, coords[i * 3 + 0], coords[i * 3 + 1], coords[i * 3 + 2]);
+  }
 
   // Create a VTK unstructured grid
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  m_mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  m_mesh->SetPoints(points);
 
   int nb_cells_to_allocate = 0;
   {
@@ -120,23 +119,22 @@ void HyperionMainDriver::load_mesh()
   }
 
   // Allocate cells
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO : write code here
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  m_mesh->Allocate(nb_cells_to_allocate);
 
   // Get global cells and nodes
   nodes.clear();
   std::vector<std::size_t> cells;
   gmsh::model::mesh::getElementsByType(MSH_QUAD_4, cells, nodes);
 
+  // Translates from 1-indexing to 0-indexing
+  for (auto & n : nodes) n--;
+
   for (std::size_t c = 0; c < cells.size(); ++c) {
     m_msh_vtk_cells[cells[c]] = c;
     m_vtk_msh_cells[c] = cells[c];
 
     // Insert connectivites, i.e. nodes connected to a cell
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Write code here
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    m_mesh->InsertNextCell(VTK_QUAD, 4, reinterpret_cast<const vtkIdType *>(&nodes[c * 4]));
   }
 
   gmsh::finalize();
