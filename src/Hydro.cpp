@@ -88,6 +88,19 @@ void add_vector_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   fieldData->AddArray(vtkFields);
 }
 
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
+vtkSmartPointer<vtkIdList> get_cell_points(const vtkSmartPointer<vtkUnstructuredGrid>& mesh, int cell_id)
+{
+  auto points = vtkSmartPointer<vtkIdList>::New();
+  mesh->GetCellPoints(cell_id, points);
+
+  // Every cell is a quad, then every cell must have exactly 4 points
+  assert(points->GetNumberOfIds() == 4);
+  return points;
+}
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -130,11 +143,7 @@ void Hydro::init()
     double node_mass_contrib = 0.25 * m_vars->m_cell_mass[c];
 
     // DONE: Get cell c to retrieve its node ids
-    auto points = vtkSmartPointer<vtkIdList>::New();
-    m_mesh->GetCellPoints(c, points);
-
-    // Every cell is a quad, then every cell must have exactly 4 points
-    assert(points->GetNumberOfIds() == 4);
+    auto points = get_cell_points(m_mesh, c);
 
     int nb_nodes_for_cell = points->GetNumberOfIds(); // Change this line to get the correct number of nodes
     for (int n = 0; n < nb_nodes_for_cell; ++n) {
@@ -167,11 +176,7 @@ void Hydro::compute_volume()
     // Cache local coordinates;
 
     // DONE: Get cell c to retrieve its nodes
-    auto points = vtkSmartPointer<vtkIdList>::New();
-    m_mesh->GetCellPoints(c, points);
-
-    // Every cell is a quad, then every cell must have exactly 4 points
-    assert(points->GetNumberOfIds() == 4);
+    auto points = get_cell_points(m_mesh, c);
 
     int nb_nodes_of_cell = points->GetNumberOfIds(); // Change this line to get the correct number of nodes
     for (int n = 0; n < nb_nodes_of_cell; ++n) {
@@ -228,11 +233,7 @@ void Hydro::compute_pressure_force()
 
   for (int c = 0; c < m_vars->m_nb_cells; ++c) {
     // DONE: Get cell c to retrieve its node ids
-    auto points = vtkSmartPointer<vtkIdList>::New();
-    m_mesh->GetCellPoints(c, points);
-
-    // Every cell is a quad, then every cell must have exactly 4 points
-    assert(points->GetNumberOfIds() == 4);
+    auto points = get_cell_points(m_mesh, c);
 
     int nb_nodes_for_cell = points->GetNumberOfIds(); // Change this line to get the correct number of nodes
     for (int n = 0; n < nb_nodes_for_cell; ++n) {
