@@ -36,14 +36,14 @@ void add_cell_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
   auto vtkFields = vtkSmartPointer<vtkDoubleArray>::New();
   vtkFields->Allocate(field.size());
   vtkFields->SetName(field_name.c_str());
+  vtkFields->SetNumberOfComponents(1);
 
   for (auto f : field) {
     vtkFields->InsertNextValue(f);
   }
 
-  auto fieldData = mesh->GetFieldData();
+  auto fieldData = mesh->GetCellData();
   fieldData->AddArray(vtkFields);
-  mesh->SetFieldData(fieldData);
 }
 
 //----------------------------------------------------------------------------
@@ -54,7 +54,17 @@ void add_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
                     const std::string& field_name)
 {
   // DONE: Create a VTK double array, insert values and attach it to the mesh
-  add_cell_field(mesh, field, field_name);
+  auto vtkFields = vtkSmartPointer<vtkDoubleArray>::New();
+  vtkFields->Allocate(field.size());
+  vtkFields->SetName(field_name.c_str());
+  vtkFields->SetNumberOfComponents(1);
+
+  for (auto f : field) {
+    vtkFields->InsertNextValue(f);
+  }
+
+  auto fieldData = mesh->GetPointData();
+  fieldData->AddArray(vtkFields);
 }
 
 //----------------------------------------------------------------------------
@@ -74,9 +84,8 @@ void add_vector_node_field(vtkSmartPointer<vtkUnstructuredGrid> mesh,
     vtkFields->InsertNextTuple2(f.first, f.second);
   }
 
-  auto fieldData = mesh->GetFieldData();
+  auto fieldData = mesh->GetPointData();
   fieldData->AddArray(vtkFields);
-  mesh->SetFieldData(fieldData);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -323,8 +332,6 @@ void Hydro::move_nodes()
     points[1] = m_vars->m_node_coord[n].second;
     mesh_points->SetPoint(n, points);
   }
-
-  m_mesh->SetPoints(mesh_points);
 }
 
 /*---------------------------------------------------------------------------*/
