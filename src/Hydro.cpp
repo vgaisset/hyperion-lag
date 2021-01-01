@@ -391,10 +391,6 @@ void Hydro::dump(int step, double simulation_time)
     << simulation_time << " s -- Time step : " << m_dt << " s\n";
 
   // Attach the simulation time to the mesh
-  /*
-   * Not sure about this one... Using FieldData seems to be the right thing to do
-   * to attach time, but I fail to see it in paraview.
-   */
   auto timeArray = vtkSmartPointer<vtkDoubleArray>::New();
   timeArray->SetNumberOfComponents(1);
   timeArray->SetName("Time");
