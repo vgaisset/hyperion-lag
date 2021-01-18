@@ -437,12 +437,11 @@ void Hydro::analyze_insitu(double simulation_time, int iteration, bool last_iter
 
 void Hydro::update_fields(double simulation_time)
 {
-  // Attach the simulation time to the mesh
-  auto timeArray = vtkSmartPointer<vtkDoubleArray>::New();
-  timeArray->SetNumberOfComponents(1);
-  timeArray->SetName("Time");
-  timeArray->InsertNextValue(simulation_time);
-  m_mesh->GetFieldData()->AddArray(timeArray);
+  vtkNew<vtkDoubleArray> time;
+  time->SetName("TimeValue");
+  time->SetNumberOfTuples(1);
+  time->InsertValue(0, simulation_time);
+  m_mesh->GetFieldData()->AddArray(time);
 
   add_cell_field(m_mesh, m_vars->m_pressure, "Pressure");
   add_cell_field(m_mesh, m_vars->m_artificial_viscosity, "ArtificialViscosity");
@@ -454,11 +453,6 @@ void Hydro::update_fields(double simulation_time)
   add_node_field(m_mesh, m_vars->m_node_mass, "NodeMass");
   add_vector_node_field(m_mesh, m_vars->m_velocity, "NodeVelocity");
   add_vector_node_field(m_mesh, m_vars->m_force, "NodeForce");
-
-  // DONE: Write the solutions to file_name
-  m_writer->SetFileName(file_name.c_str());
-  m_writer->SetInputData(m_mesh);
-  m_writer->Write();
 }
 
 /*---------------------------------------------------------------------------*/
